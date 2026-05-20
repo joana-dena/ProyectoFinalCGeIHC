@@ -7,7 +7,7 @@ Integrantes:
 
 - Arroyo Solano Víctor Julian
 - Dena Álvarez Joana María
-- Ocampo Quezada Juan Emmanue
+- Ocampo Quezada Juan Emmanuel
 - Romero García Diana Sofía
 - Soriano Barrera Maria Elena
 
