@@ -1,18 +1,8 @@
-/*---------------------------------------------------------*/
+ï»¿/*---------------------------------------------------------*/
 /* ----------------   Proyecto Final  --------------------------*/
 /*-----------------    2026-2   ---------------------------*/
-/*------------- Computación Gráfica e ---------------*/
-/*------------- Interacción Humano-Computadora ---------------*/
-/*
-Arroyo Solano Víctor Julian - 423529834
-Dena Álvarez Joana María - 320084847
-Ocampo Quezada Juan Emmanuel - 320139260
-Romero García Diana Sofía - 319339264
-Soriano Barrera Maria Elena - 319154917
-*/
-
-
-
+/*------------- ComputaciÃ³n GrÃ¡fica e ---------------*/
+/*------------- InteracciÃ³n Humano-Computadora ---------------*/
 
 #include <AL/al.h>
 #include <AL/alc.h>
@@ -112,7 +102,7 @@ float alturaActual = 70.0f;
 Camera camera(glm::vec3(0.0f, alturaActual, 1000.0f));
 float MovementSpeed = 0.1f;
 GLfloat lastX = SCR_WIDTH / 2.0f,
-		lastY = SCR_HEIGHT / 2.0f;
+lastY = SCR_HEIGHT / 2.0f;
 bool firstMouse = true;
 
 
@@ -123,9 +113,9 @@ double	deltaTime = 0.0f,
 lastFrame = 0.0f;
 
 void getResolution(void);
-void myData(void);							
-void LoadTextures(void);				
-unsigned int generateTextures(char*, bool, bool);	
+void myData(void);
+void LoadTextures(void);
+unsigned int generateTextures(char*, bool, bool);
 
 float myTime = 0.0f;
 //Variables nuevas para mi implementacion
@@ -192,40 +182,58 @@ float velocidadPendulo = 0.05f;
 float tiempoPendulo = 0.0f;
 bool animacionBotes = false;
 float timerBotes = 0.0f;
-bool detectado = false; 
+bool detectado = false;
 
 float factorRecogido = 1.0f; // 1.0 = Cerrada, 0.1 = Recogida
 
-//Keyframes (Manipulación y dibujo)
+//Robot
+float movRobotX = 0.0f,
+movRobotZ = 0.0f,
+tiempoRobot = 0.0f,
+orientaRobot = 0.0f;
+int edoRobot = 1;
+bool animacionRobot = false;
+
+//Keyframes (ManipulaciÃ³n y dibujo)
 float	posX = 0.0f,
-		posY = 0.0f,
-		posZ = 0.0f,
-		rotRodIzq = 0.0f,
-		giroMonito = 0.0f,
-		giroCabeza = 0.0f,
-		giroBrazoDer = 0.0f;
+posY = 0.0f,
+posZ = 0.0f,
+rotRodIzq = 0.0f,
+giroMonito = 0.0f,
+giroCabeza = 0.0f,
+giroBrazoDer = 0.0f;
 float	incX = 0.0f,
-		incY = 0.0f,
-		incZ = 0.0f,
-		rotRodIzqInc = 0.0f,
-		giroMonitoInc = 0.0f,
-		giroCabezaInc = 0.0f,
-		giroBrazoDerInc = 0.0f;
+incY = 0.0f,
+incZ = 0.0f,
+rotRodIzqInc = 0.0f,
+giroMonitoInc = 0.0f,
+giroCabezaInc = 0.0f,
+giroBrazoDerInc = 0.0f;
+
+
+//dron
+
+float rotHelices = 0.0f;
+float dronX = 0.0f;
+float dronY = 80.0f; // ALTURA DEL DRON
+float dronZ = 0.0f;
+float velocidadDron = 0.5f;
+
 
 struct Frame {
 	float x, z;
-	float yaw; 
+	float yaw;
 };
 
-float tFord = 0.0f;          
-int indexFord = 0;           
-bool playAnimacion = false;  
+float tFord = 0.0f;
+int indexFord = 0;
+bool playAnimacion = false;
 float currX = 954.365f, currZ = 825.198f, currYaw = 180.0f;
 float rotLlantas = 0.0f;
 Frame pasosFord[] = {
 	{ 954.365f,  825.198f,  180.0f }, // 0: Inicio
 	{ -199.134f, 826.909f,  180.0f }, // 1: Llega al punto de giro (Recto)
-	{ -199.134f, 826.909f,  270.0f }, // 2: Mismo lugar, pero ya volteó a la izquierda
+	{ -199.134f, 826.909f,  270.0f }, // 2: Mismo lugar, pero ya volteÃ³ a la izquierda
 	{ -196.733f, 1055.2f,   270.0f }, // 3: Avanza ya orientado hacia el siguiente punto
 	{ -196.733f, 1055.2f,   360.0f }, // 4: Gira en su lugar otra vez
 	{ 885.784f,  1095.17f,  360.0f }  // 5: Final
@@ -250,7 +258,7 @@ typedef struct _frame
 }FRAME;
 
 FRAME KeyFrame[MAX_FRAMES];
-int FrameIndex = 0;			//introducir número en caso de tener Key guardados
+int FrameIndex = 0;			//introducir nÃºmero en caso de tener Key guardados
 bool play = false;
 int playIndex = 0;
 
@@ -310,8 +318,8 @@ unsigned int generateTextures(const char* filename, bool alfa, bool isPrimitive)
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 	// load image, create texture and generate mipmaps
 	int width, height, nrChannels;
-	
-	if(isPrimitive)
+
+	if (isPrimitive)
 		stbi_set_flip_vertically_on_load(true); // tell stb_image.h to flip loaded texture's on the y-axis.
 	else
 		stbi_set_flip_vertically_on_load(false); // tell stb_image.h to flip loaded texture's on the y-axis.
@@ -395,30 +403,30 @@ void animate(void)
 		}
 	}
 
-		if (playAnimacion) {
-			tFord += 0.002f;
+	if (playAnimacion) {
+		tFord += 0.002f;
 
-			if (tFord >= 1.0f) {
-				tFord = 0.0f;
-				indexFord++;
+		if (tFord >= 1.0f) {
+			tFord = 0.0f;
+			indexFord++;
 
-				if (indexFord >= 5) {
-					indexFord = 0;
-				}
-			}
-
-			int sig = indexFord + 1;
-			sig %= 6;
-
-			currX = pasosFord[indexFord].x + (pasosFord[sig].x - pasosFord[indexFord].x) * tFord;
-			currZ = pasosFord[indexFord].z + (pasosFord[sig].z - pasosFord[indexFord].z) * tFord;
-			currYaw = pasosFord[indexFord].yaw + (pasosFord[sig].yaw - pasosFord[indexFord].yaw) * tFord;
-
-			if (pasosFord[indexFord].x != pasosFord[sig].x || pasosFord[indexFord].z != pasosFord[sig].z) {
-				rotLlantas += 5.0f;
+			if (indexFord >= 5) {
+				indexFord = 0;
 			}
 		}
-	
+
+		int sig = indexFord + 1;
+		sig %= 6;
+
+		currX = pasosFord[indexFord].x + (pasosFord[sig].x - pasosFord[indexFord].x) * tFord;
+		currZ = pasosFord[indexFord].z + (pasosFord[sig].z - pasosFord[indexFord].z) * tFord;
+		currYaw = pasosFord[indexFord].yaw + (pasosFord[sig].yaw - pasosFord[indexFord].yaw) * tFord;
+
+		if (pasosFord[indexFord].x != pasosFord[sig].x || pasosFord[indexFord].z != pasosFord[sig].z) {
+			rotLlantas += 5.0f;
+		}
+	}
+
 
 
 	if (animacion)
@@ -426,7 +434,7 @@ void animate(void)
 		switch (estadoAutoAmarillo)
 		{
 		case 1: // REVERSA 200 
-			movAuto_x -= 3.0f; // Retrocede
+			movAuto_x -= 4.0f; // Retrocede
 			orienta = 270.0f;
 			if (movAuto_x <= -200.0f) {
 				estadoAutoAmarillo = 2;
@@ -434,15 +442,15 @@ void animate(void)
 			break;
 
 		case 2: // SUBIR 200.5 
-			movAuto_y += 3.0f;
+			movAuto_y += 4.0f;
 			orienta = 0.0f;
-			if (movAuto_y >= 200.5f) {
+			if (movAuto_y >= 100.5f) {
 				estadoAutoAmarillo = 3;
 			}
 			break;
 
 		case 3: // AVANZAR 310.5 
-			movAuto_x += 3.0f;
+			movAuto_x += 4.0f;
 			orienta = 90.0f;
 
 			if (movAuto_x >= 110.5f) {
@@ -520,7 +528,73 @@ void animate(void)
 		}
 	}
 
+//AnimaciÃ³n robot
+	if (animacionRobot)
+	{
+		switch (edoRobot)
+		{
+		case 1: // avanza derecha
+			orientaRobot = 90.0f;
+			movRobotX += 0.20f;
+			if (movRobotX >= 40.0f)
+				edoRobot = 2;
+			break;
 
+		case 2: // sube
+			orientaRobot = 0.0f;
+			movRobotZ += 0.20f;
+			if (movRobotZ >= 30.0f)
+				edoRobot = 3;
+			break;
+
+		case 3: // diagonal izquierda-arriba
+			orientaRobot = -45.0f;
+			movRobotX -= 0.15f;
+			movRobotZ += 0.15f;
+			if (movRobotX <= 15.0f && movRobotZ >= 55.0f)
+				edoRobot = 4;
+			break;
+
+		case 4: // baja en diagonal derecha
+			orientaRobot = 135.0f;
+			movRobotX += 0.15f;
+			movRobotZ -= 0.15f;
+			if (movRobotX >= 45.0f && movRobotZ <= 25.0f)
+				edoRobot = 5;
+			break;
+
+		case 5: // avanza izquierda
+			orientaRobot = -90.0f;
+			movRobotX -= 0.20f;
+			if (movRobotX <= -20.0f)
+				edoRobot = 6;
+			break;
+
+		case 6: // baja
+			orientaRobot = 180.0f;
+			movRobotZ -= 0.20f;
+			if (movRobotZ <= -20.0f)
+				edoRobot = 7;
+			break;
+
+		case 7: // diagonal al centro
+			orientaRobot = 45.0f;
+			movRobotX += 0.15f;
+			movRobotZ += 0.15f;
+			if (movRobotX >= 0.0f && movRobotZ >= 0.0f)
+				edoRobot = 8;
+			break;
+
+		case 8: // reset
+			movRobotX = 0.0f;
+			movRobotZ = 0.0f;
+			orientaRobot = 90.0f;
+			edoRobot = 1;
+			break;
+		}
+	}
+
+//AnimaciÃ³n botes
 	glm::vec3 posBotes = glm::vec3(353.892f, alturaActual, 722.162f);
 	float distancia = glm::distance(camera.Position, posBotes);
 	if (distancia <= 50.0f) {
@@ -532,18 +606,18 @@ void animate(void)
 	if (animacionBotes) {
 		timerBotes += 0.01f;
 		if (timerBotes >= 3.0f) {
-			animacionBotes = false; 
+			animacionBotes = false;
 			tiempoPendulo = 0.0f;
 		}
-		tiempoPendulo += 0.02f; 
-		anguloBote1 = sin(tiempoPendulo) * 15.0f; 
+		tiempoPendulo += 0.02f;
+		anguloBote1 = sin(tiempoPendulo) * 15.0f;
 		anguloBote2 = sin(tiempoPendulo + 3.1415f) * 15.0f;
 	}
 	else {
 		anguloBote1 = 0.0f;
 		anguloBote2 = 0.0f;
 	}
-		
+
 	glm::vec3 posCortina = glm::vec3(35.0f, alturaActual, 195.0f);
 	float dist = glm::distance(camera.Position, posCortina);
 
@@ -554,9 +628,24 @@ void animate(void)
 		if (factorRecogido < 1.0f) factorRecogido += 0.01f; // Se cierra
 	}
 
-	}
+/////////////////////// Dron
+
+rotHelices += 20.0f;
+
+if (rotHelices >= 360.0f)
+{
+	rotHelices = 0.0f;
+}
+
+// Movimiento circular del dron
+dronX = cos(glfwGetTime() * 0.3f) * 50.0f;
+dronZ = sin(glfwGetTime() * 0.3f) * 50.0f;
+
+// Flotacion
+dronY = 80.0f + sin(glfwGetTime() * 2.0f) * 5.0f;
 
 
+}
 void getResolution() {
 	const GLFWvidmode* mode = glfwGetVideoMode(glfwGetPrimaryMonitor());
 	SCR_WIDTH = mode->width;
@@ -704,7 +793,7 @@ int main() {
 	glfwSetScrollCallback(window, scroll_callback);
 	glfwSetKeyCallback(window, my_input);
 
-	glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED); 
+	glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
 	// glad: load all OpenGL function pointers
 	// ---------------------------------------
@@ -719,8 +808,10 @@ int main() {
 	{
 		std::cout << "Error iniciando SDL Audio\n";
 	}
+	std::cout << "Buscando audio en: " << SDL_GetBasePath() << std::endl;
+	std::cout << "SDL Error: " << SDL_GetError() << std::endl;
 
-	if (SDL_LoadWAV("resources/Sounds/unam.wav",
+	if (SDL_LoadWAV("resources/sounds/unam.wav",
 		&wavSpec,
 		&wavBuffer,
 		&wavLength) == NULL)
@@ -764,7 +855,7 @@ int main() {
 	myData();
 	glEnable(GL_DEPTH_TEST);
 
-	
+
 
 	// build and compile shaders
 	// -------------------------
@@ -772,7 +863,7 @@ int main() {
 	Shader staticShader("Shaders/shader_Lights.vs", "Shaders/shader_Lights_mod.fs");	//To use with static models
 	Shader skyboxShader("Shaders/skybox.vs", "Shaders/skybox.fs");	//To use with skybox
 	Shader animShader("Shaders/anim.vs", "Shaders/anim.fs");	//To use with animated models 
-	
+
 	vector<std::string> faces{
 		/*
 		"resources/skybox/right.jpg",
@@ -833,6 +924,14 @@ int main() {
 	Model soporteBoteVerde("resources/objects/boteBasura/Verde/SoporteBoteVerde.obj");
 	Model BoteVerde("resources/objects/boteBasura/Verde/BoteVerde.obj");
 
+	/////////////////////////////////////////////////////////////////////////////////////////////////////ROBOT
+	Model robotCuerpo("resources/objects/bot/cuerpo.obj");
+	Model robotBrazoDer("resources/objects/bot/brazoDer.obj");
+	Model robotBrazoIzq("resources/objects/bot/brazoIzq.obj");
+	Model robotPiernaDer("resources/objects/bot/piernaDer.obj");
+	Model robotPiernaIzq("resources/objects/bot/piernaIzq.obj");
+
+
 	/////////////////////////////////////////////////////////////////////////////////////////////////////proyecto
 
 	Model StandPantalla("resources/objects/StandPantalla/StandPantalla2.obj");
@@ -852,25 +951,36 @@ int main() {
 	ModelAnim animacionPersonaje("resources/objects/Personaje1/Arm.dae");
 	animacionPersonaje.initShaders(animShader.ID);
 
+	/////////////////////////////////////////////////////////////////////////////////////////////////////proyecto
+
+
+	Model dronCuerpo("resources/objects/Dron/Cuerpo.obj");
+	Model helice1("resources/objects/Dron/helice1.obj");
+	Model helice2("resources/objects/Dron/helice2.obj");
+	Model helice3("resources/objects/Dron/helice3.obj");
+	Model helice4("resources/objects/Dron/helice4.obj");
+	/////////////////////////////////////////////////////////////////////////////////////////////////////proyecto
+
+	
 
 	for (int i = 1; i <= 217; i++) {
 		char nombreArchivo[150];
-	
+
 		sprintf(nombreArchivo, "resources/Textures/Pantalla/ezgif-frame-%03d.png", i);
 
-	
+
 		unsigned int id = TextureFromFile(nombreArchivo, ".");
 		if (id != 0) {
 			secuenciaTexturas.push_back(id);
 		}
 		else {
-	
+
 			std::cout << "Error al cargar: " << nombreArchivo << std::endl;
 		}
 	}
 	/////////////////////////////////////////////////////////////////////////////////////////////////////proyecto
 
-	//Inicialización de KeyFrames
+	//InicializaciÃ³n de KeyFrames
 	for (int i = 0; i < MAX_FRAMES; i++)
 	{
 		KeyFrame[i].posX = 0;
@@ -908,7 +1018,7 @@ int main() {
 		skybox.Draw(skyboxShader, viewOp, projectionOp, camera);
 
 		// --- Dibujado de la Pantalla ---
-		staticShader.use(); 
+		staticShader.use();
 		staticShader.setMat4("projection", projectionOp);
 		staticShader.setMat4("view", viewOp);
 
@@ -925,13 +1035,13 @@ int main() {
 		float anguloMin = -(float)m * 6.0f;
 		float anguloHor = -((float)(h % 12) * 30.0f + (float)m * 0.5f);
 
-		
+
 		glm::mat4 modelReloj = glm::mat4(1.0f);
 		modelReloj = glm::translate(modelReloj, glm::vec3(-440.0f, 100.0f, -70.0f));
-		modelReloj = glm::rotate(modelReloj, glm::radians(90.0f), glm::vec3(1.0f, 0.0f, 0.0f)); 
+		modelReloj = glm::rotate(modelReloj, glm::radians(90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
 		modelReloj = glm::rotate(modelReloj, glm::radians(-90.0f), glm::vec3(0.0f, 0.0f, 1.0f));
 		modelReloj = glm::scale(modelReloj, glm::vec3(1.0f, 1.0f, 1.0f));
-		
+
 		staticShader.setMat4("model", modelReloj);
 		staticShader.setBool("usarColorManual", false);
 		Reloj.Draw(staticShader);
@@ -957,12 +1067,12 @@ int main() {
 		modelHor = glm::rotate(modelHor, glm::radians(anguloHor), glm::vec3(0.0f, 1.0f, 0.0f));
 		staticShader.setMat4("model", modelHor);
 		Horas.Draw(staticShader);
-		
+
 
 		staticShader.setBool("usarColorManual", false);
-		
-		
-		// --- Lógica para el video ---
+
+
+		// --- LÃ³gica para el video ---
 		float tiempoActual = SDL_GetTicks() / 1000.0f; // Convertimos milisegundos a segundos
 		static float tiempoAnterior = 0.0f;
 		float deltaTimeVideo = tiempoActual - tiempoAnterior;
@@ -976,7 +1086,7 @@ int main() {
 			tiempoAcumulado = 0.0f;
 		}
 
-		
+
 		lonaShader.use();
 		lonaShader.setMat4("projection", projectionOp);
 		lonaShader.setMat4("view", viewOp);
@@ -991,7 +1101,7 @@ int main() {
 
 		lonaShader.setMat4("model", modelLona);
 		LonaFord.Draw(lonaShader);
-		
+
 
 		glm::mat4 modelLona2 = glm::mat4(1.0f);
 		lonaShader.setInt("tipoViento", 1);
@@ -999,19 +1109,19 @@ int main() {
 		modelLona2 = glm::scale(modelLona2, glm::vec3(5.0f, 5.0f, 5.0f));
 		lonaShader.setMat4("model", modelLona2);
 		LonaFi.Draw(lonaShader);
-		
+
 
 		staticShader.use();
 
 
 		/////////////////////////////////////////////////////////////////////////////////////////////////////proyecto
-		
+
 		// input
 		// -----
 		//my_input(window);
 		animate();
 
-		
+
 		/////////////////////////////////////////////////////////////////////////////////////////////////////proyecto
 		glActiveTexture(GL_TEXTURE0);
 		if (!secuenciaTexturas.empty()) {
@@ -1023,7 +1133,7 @@ int main() {
 		modelPantallaMat = glm::scale(modelPantallaMat, glm::vec3(1.5f, 1.5f, 1.5f));
 		staticShader.setMat4("model", modelPantallaMat);
 		Pantalla.Draw(staticShader);
-		
+
 
 		// don't forget to enable shader before setting uniforms
 		//Setup shader for static models
@@ -1036,7 +1146,7 @@ int main() {
 		staticShader.setVec3("dirLight.ambient", glm::vec3(0.6f, 0.6f, 0.6f)); // Luz suave de relleno
 		staticShader.setVec3("dirLight.diffuse", glm::vec3(0.6f, 0.6f, 0.6f)); // Intensidad media
 		staticShader.setVec3("dirLight.specular", glm::vec3(1.0f, 1.0f, 1.0f));
-		
+
 
 		staticShader.setVec3("pointLight[0].position", lightPosition);
 		staticShader.setVec3("pointLight[0].ambient", glm::vec3(0.0f, 0.0f, 0.0f));
@@ -1062,7 +1172,7 @@ int main() {
 		staticShader.setFloat("pointLight[2].linear", 0.009f);
 		staticShader.setFloat("pointLight[2].quadratic", 0.032f);
 
-		staticShader.setVec3("spotLight[0].position", glm::vec3(camera.Position.x, camera.Position.y, camera.Position.z ));
+		staticShader.setVec3("spotLight[0].position", glm::vec3(camera.Position.x, camera.Position.y, camera.Position.z));
 		staticShader.setVec3("spotLight[0].direction", glm::vec3(camera.Front.x, camera.Front.y, camera.Front.z));
 		staticShader.setVec3("spotLight[0].ambient", glm::vec3(0.0f, 0.0f, 0.0f));
 		staticShader.setVec3("spotLight[0].diffuse", glm::vec3(0.0f, 0.0f, 0.0f));
@@ -1088,7 +1198,7 @@ int main() {
 		// note: currently we set the projection matrix each frame, but since the projection matrix rarely changes it's often best practice to set it outside the main loop only once.
 		myShader.setMat4("projection", projectionOp);
 		/**********/
-		
+
 
 		// -------------------------------------------------------------------------------------------------------------------------
 		// Personaje Animacion
@@ -1105,13 +1215,13 @@ int main() {
 		animShader.setVec3("light.specular", 1.0f, 1.0f, 1.0f);
 		animShader.setVec3("light.direction", lightDirection);
 		animShader.setVec3("viewPos", camera.Position);
-		
+
 		modelOp = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, -40.0f, 0.0f)); // translate it down so it's at the center of the scene
 		modelOp = glm::scale(modelOp, glm::vec3(0.05f));	// it's a bit too big for our scene, so scale it down
 		modelOp = glm::rotate(modelOp, glm::radians(90.0f), glm::vec3(0.0f, 1.0f, 0.0f));
 		animShader.setMat4("model", modelOp);
 		animacionPersonaje.Draw(animShader);
-		
+
 		// -------------------------------------------------------------------------------------------------------------------------
 		// Escenario Primitivas
 		// -------------------------------------------------------------------------------------------------------------------------
@@ -1119,18 +1229,15 @@ int main() {
 
 		//Tener Piso como referencia
 		glBindVertexArray(VAO[2]);
-		//Colocar código aquí
 		modelOp = glm::scale(glm::mat4(1.0f), glm::vec3(40.0f, 2.0f, 40.0f));
 		modelOp = glm::translate(modelOp, glm::vec3(0.0f, -1.0f, 0.0f));
 		modelOp = glm::rotate(modelOp, glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
 		myShader.setMat4("model", modelOp);
 		myShader.setVec3("aColor", 1.0f, 1.0f, 1.0f);
-		//glBindTexture(GL_TEXTURE_2D, t_ladrillos);
-		//glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 
 
 		glBindVertexArray(0);
-		
+
 		// -------------------------------------------------------------------------------------------------------------------------
 		// Escenario
 		// -------------------------------------------------------------------------------------------------------------------------
@@ -1186,23 +1293,23 @@ int main() {
 		staticShader.setMat4("model", modelOp);
 		StandHuawei.Draw(staticShader);
 
-		// --- MATRIZ PADRE (CARROCERÍA) ---
+		// --- MATRIZ PADRE (CARROCERÃA) ---
 		glm::mat4 modelCarro = glm::mat4(1.0f);
 		modelCarro = glm::translate(modelCarro, glm::vec3(currX, 0.0f, currZ));
-		modelCarro = glm::rotate(modelCarro, glm::radians(currYaw+90.0f), glm::vec3(0.0f, 1.0f, 0.0f));
-		modelCarro = glm::scale(modelCarro, glm::vec3(6.0f)); 
+		modelCarro = glm::rotate(modelCarro, glm::radians(currYaw + 90.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+		modelCarro = glm::scale(modelCarro, glm::vec3(6.0f));
 		staticShader.setMat4("model", modelCarro);
 		CarroceriaFord.Draw(staticShader);
 		// --- MATRICES HIJAS (LLANTAS) ---
 		auto dibujarLlanta = [&](glm::vec3 offset, float rotY, bool derecha) {
-			glm::mat4 m = modelCarro; 
+			glm::mat4 m = modelCarro;
 			m = glm::translate(m, offset);
 			m = glm::scale(m, glm::vec3(0.9375f));
 			m = glm::rotate(m, glm::radians(rotY), glm::vec3(0.0f, 1.0f, 0.0f));
 			m = glm::rotate(m, glm::radians(rotLlantas), glm::vec3(1.0f, 0.0f, 0.0f));
 			staticShader.setMat4("model", m);
 			LlantaFord.Draw(staticShader);
-			};
+		};
 
 		dibujarLlanta(glm::vec3(-7.5f, 2.5f, 13.0f), 0.0f, false);   // Del Izq
 		dibujarLlanta(glm::vec3(-7.5f, 2.5f, -12.0f), 0.0f, false);  // Tras Izq
@@ -1239,14 +1346,14 @@ int main() {
 		modelOp = glm::scale(modelOp, glm::vec3(46.0f * factorRecogido, 46.0f, 46.0f));
 		staticShader.setMat4("model", modelOp);
 		cortina.Draw(staticShader);
-		
+
 		modelOp = glm::translate(glm::mat4(1.0f), glm::vec3(-330.0f, 0.0f, 380.0f));
 		modelOp = glm::scale(modelOp, glm::vec3(19.5f));
 		modelOp = glm::rotate(modelOp, glm::radians(45.0f), glm::vec3(0.0f, 1.0f, 0.0f));
 		staticShader.setMat4("model", modelOp);
 		ford.Draw(staticShader);
 
-		// PERRO ROBOT
+		////////////////////////////////////////// PERRO ROBOT
 		glm::mat4 jerarquiaPerrito;
 		jerarquiaPerrito = glm::translate(glm::mat4(1.0f), glm::vec3(40.0f + movPerritoX, 0.0f, 25.0f + movPerritoZ));
 		jerarquiaPerrito = glm::rotate(jerarquiaPerrito, glm::radians(180.0f + orientaPerrito), glm::vec3(0.0f, 1.0f, 0.0f));
@@ -1290,10 +1397,60 @@ int main() {
 		modelOp = glm::rotate(modelOp, glm::radians(giroPataDerFPerrito), glm::vec3(0.0f, 1.0f, 0.0f));
 		staticShader.setMat4("model", modelOp);
 		perritoPataIzqT.Draw(staticShader);
+		 /////////////////////////////////////////////////////////////////////////////////ROBOT
+		glm::mat4 jerarquiaRobot;
 
+		jerarquiaRobot = glm::translate(glm::mat4(1.0f), glm::vec3(-210.0f + movRobotX, 0.0f, 0.0f + movRobotZ));
+		jerarquiaRobot = glm::rotate(jerarquiaRobot, glm::radians(180.0f + orientaRobot), glm::vec3(0.0f, 1.0f, 0.0f));
+		jerarquiaRobot = glm::scale(jerarquiaRobot, glm::vec3(2.5f));
+		staticShader.setMat4("model", jerarquiaRobot);
+		robotCuerpo.Draw(staticShader);
+
+		/////////////// DRON
+
+		glm::mat4 dronBase = glm::mat4(1.0f);
+		dronBase = glm::translate(dronBase, glm::vec3(dronX, dronY, dronZ));
+
+		glm::mat4 modelCuerpo = dronBase;
+		modelCuerpo = glm::scale(modelCuerpo, glm::vec3(0.8f));
+		staticShader.setMat4("model", modelCuerpo);
+		dronCuerpo.Draw(staticShader);
+
+		// Helice 1
+		glm::mat4 h1 = dronBase;
+		h1 = glm::translate(h1, glm::vec3(19.549f, 5.0f, 15.0f));
+		h1 = glm::rotate(h1, glm::radians(rotHelices), glm::vec3(0.0f, 1.0f, 0.0f));
+		h1 = glm::scale(h1, glm::vec3(0.8f));
+		staticShader.setMat4("model", h1);
+		helice1.Draw(staticShader);
+
+		// Helice 2
+		glm::mat4 h2 = dronBase;
+		h2 = glm::translate(h2, glm::vec3(9.324f, 5.0f, 25.14f));
+		h2 = glm::rotate(h2, glm::radians(rotHelices), glm::vec3(0.0f, 1.0f, 0.0f));
+		h2 = glm::scale(h2, glm::vec3(0.8f));
+		staticShader.setMat4("model", h2);
+		helice2.Draw(staticShader);
+
+		// Helice 3
+		glm::mat4 h3 = dronBase;
+		h3 = glm::translate(h3, glm::vec3(0.0f, 5.0f, 15.916f));
+		h3 = glm::rotate(h3, glm::radians(rotHelices), glm::vec3(0.0f, 1.0f, 0.0f));
+		h3 = glm::scale(h3, glm::vec3(0.8f));
+		staticShader.setMat4("model", h3);
+		helice3.Draw(staticShader);
+
+		// Helice 4
+		glm::mat4 h4 = dronBase;
+		h4 = glm::translate(h4, glm::vec3(9.324f, 5.0f, 10.679f));
+		h4 = glm::rotate(h4, glm::radians(rotHelices), glm::vec3(0.0f, 1.0f, 0.0f));
+		h4 = glm::scale(h4, glm::vec3(0.8f));
+		staticShader.setMat4("model", h4);
+		helice4.Draw(staticShader);
+		//////////////////////////////////////////////////////////////////////////////////
 
 		glm::mat4 grupoBotes = glm::translate(glm::mat4(1.0f),
-		glm::vec3(353.892f, 0.0f, 722.162f));
+			glm::vec3(353.892f, 0.0f, 722.162f));
 		glm::mat4 baseGris = glm::translate(grupoBotes, glm::vec3(-20.0f, 0.0f, 0.0f));
 		baseGris = glm::rotate(baseGris, glm::radians(90.0f), glm::vec3(0.0f, 1.0f, 0.0f));
 		staticShader.setMat4("model", baseGris);
@@ -1329,7 +1486,7 @@ int main() {
 			SDL_Delay((int)(LOOP_TIME - deltaTime));
 		}
 
-		
+
 		// glfw: swap buffers and poll IO events (keys pressed/released, mouse moved etc.)
 		// -------------------------------------------------------------------------------
 		glfwSwapBuffers(window);
@@ -1358,7 +1515,7 @@ int main() {
 
 // process all input: query GLFW whether relevant keys are pressed/released this frame and react accordingly
 // ---------------------------------------------------------------------------------------------------------
-void my_input(GLFWwindow* window, int key, int scancode, int action, int mode) 
+void my_input(GLFWwindow* window, int key, int scancode, int action, int mode)
 {
 
 	glm::vec3 currentPos = camera.Position;
@@ -1379,23 +1536,26 @@ void my_input(GLFWwindow* window, int key, int scancode, int action, int mode)
 		lightPosition.x++;
 	if (glfwGetKey(window, GLFW_KEY_N) == GLFW_PRESS)
 		lightPosition.x--;
-
+	if (key == GLFW_KEY_K && action == GLFW_PRESS)
+	{
+		animacionRobot ^= true;
+	}
 	// 1. Puerta principal
 	if (key == GLFW_KEY_1 && action == GLFW_PRESS)
 	{
 		alturaActual = 70.0f;
 		camera.Position = glm::vec3(0.0f, alturaActual, 1000.0f);
-			camera.Yaw = -90.0f; 
-		camera.Pitch = 0.0f; 
+		camera.Yaw = -90.0f;
+		camera.Pitch = 0.0f;
 		camera.ProcessMouseMovement(0, 0);
 	}
 
-	// 2. Elemento con animación (Pantalla)
+	// 2. Elemento con animaciÃ³n (Pantalla)
 	if (key == GLFW_KEY_2 && action == GLFW_PRESS)
 	{
 		alturaActual = 70.0f;
 		camera.Position = glm::vec3(-29.5f, alturaActual, -500.0f);
-			camera.Yaw = -90.0f;   
+		camera.Yaw = -90.0f;
 		camera.Pitch = 40.0f;
 		camera.ProcessMouseMovement(0, 0);
 	}
@@ -1405,7 +1565,7 @@ void my_input(GLFWwindow* window, int key, int scancode, int action, int mode)
 	{
 		alturaActual = 105.0f;
 		camera.Position = glm::vec3(-694.441f, alturaActual, 702.916f);
-			camera.Yaw = -218.1f;
+		camera.Yaw = -218.1f;
 		camera.Pitch = -15.4f;
 		camera.ProcessMouseMovement(0, 0);
 	}
@@ -1433,10 +1593,10 @@ void my_input(GLFWwindow* window, int key, int scancode, int action, int mode)
 	// 6. Elemento con gran detalle
 	if (key == GLFW_KEY_6 && action == GLFW_PRESS)
 	{
-		alturaActual = 50.0f; 
+		alturaActual = 50.0f;
 		camera.Position = glm::vec3(-331.0f, alturaActual, 359.8);
 		camera.Yaw = 56.3f;
-		camera.Pitch = -27.6f; 
+		camera.Pitch = -27.6f;
 		camera.ProcessMouseMovement(0, 0);
 	}
 
@@ -1462,7 +1622,7 @@ void my_input(GLFWwindow* window, int key, int scancode, int action, int mode)
 	}
 
 	if (glfwGetKey(window, GLFW_KEY_E) == GLFW_PRESS) {
-		playAnimacion = !playAnimacion; 
+		playAnimacion = !playAnimacion;
 	}
 
 	if (glfwGetKey(window, GLFW_KEY_R) == GLFW_PRESS) {
@@ -1512,7 +1672,7 @@ void framebuffer_size_callback(GLFWwindow* window, int width, int height) {
 }
 
 // glfw: whenever the mouse moves, this callback is called
-void mouse_callback(GLFWwindow* window, double xpos, double ypos) 
+void mouse_callback(GLFWwindow* window, double xpos, double ypos)
 {
 	if (firstMouse)
 	{
